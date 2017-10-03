@@ -53,12 +53,15 @@ new Product('wine-glass', 'img/wine-glass.jpg');
 // new Product('usb', 'img/usb.gif', userClicks, userViews);
 // new Product('water-can', 'img/water-can.jpg', userClicks, userViews);
 // new Product('wine-glass', 'img/wine-glass.jpg', userClicks, userViews);
-
+var randomArray = [];
 var imgEl1 = document.getElementById('item1');
 var imgEl2 = document.getElementById('item2');
 var imgEl3 = document.getElementById('item3');
 function randomProduct(){
   if (counter < 25){
+    randomArray.shift();
+    randomArray.shift();
+    randomArray.shift();
     var randomIndex1 = Math.floor(Math.random() * Product.allItems.length);
     imgEl1.src = Product.allItems[randomIndex1].filepath;
     imgEl1.addEventListener('click', randomProduct);
@@ -69,6 +72,8 @@ function randomProduct(){
     imgEl3.src = Product.allItems[randomIndex3].filepath;
     imgEl3.addEventListener('click', randomProduct);
     counter++;
+    randomArray.push(randomIndex1, randomIndex2, randomIndex3);
+    console.log(randomArray);
   } else{
     console.log('Yeet');
   };
