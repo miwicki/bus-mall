@@ -2,6 +2,10 @@
 
 var counter = 0;
 Product.allItems = [];
+Product.lastDisplayed = [];
+Product.totalClicks = 0;
+Product.section = document.getElementById('product-section');
+Product.results = document.getElementById('results');
 
 function Product(name, filepath){
 // function Product(name, filepath, votes, views){
@@ -78,4 +82,17 @@ function randomProduct(){
     console.log('Yeet');
   };
 };
+
+while(Product.lastDisplayed.includes(randomIndex1) || Product.lastDisplayed.includes(randomIndex2) || Product.lastDisplayed.includes(randomIndex3) || randomIndex1 === randomIndex2 || randomIndex1 === randomIndex3 || randomIndex2 === randomIndex3){
+  randomIndex1 = Math.floor(Math.random() * Product.allItems.length);
+  randomIndex2 = Math.floor(Math.random() * Product.allItems.length);
+  randomIndex3 = Math.floor(Math.random() * Product.allItems.length);
+}
+
+
+Product.lastDisplayed[0] = randomIndex1;
+Product.lastDisplayed[1] = randomIndex2;
+Product.lastDisplayed[2] = randomIndex3;
+
+
 randomProduct();
