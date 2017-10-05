@@ -13,6 +13,8 @@ function Product(name, filepath){
   this.votes = 0;
   Product.allItems.push(this);
 };
+var chartNames = [];
+var chartVotes = [];
 
 new Product('bag', 'img/bag.jpg');
 new Product('banana', 'img/banana.jpg');
@@ -34,7 +36,9 @@ new Product('unicorn', 'img/unicorn.jpg');
 new Product('usb', 'img/usb.gif');
 new Product('water-can', 'img/water-can.jpg');
 new Product('wine-glass', 'img/wine-glass.jpg');
-
+//
+// function updateChart(){
+// }
 
 var imgEl1 = document.getElementById('item1');
 var imgEl2 = document.getElementById('item2');
@@ -63,9 +67,6 @@ function randomProduct(){
   Product.lastDisplayed[2] = randomIndex3;
 };
 
-
-
-
 function handleClick(e) {
   if(e.target.id === 'product-section') {
     return alert('Please click on a product to choose it!');
@@ -73,19 +74,21 @@ function handleClick(e) {
 
   Product.totalClicks += 1;
 
-  console.log(e.target, 'e.target');
   for(var i = 0; i < Product.allItems.length; i++) {
     if(e.target.id === Product.allItems[i].name) {
       Product.allItems[i].votes += 1;
-      console.log(Product.allItems[i].votes, 'votes');
+      updateChart();
+      // console.log(Product.allItems[i].votes, 'votes');
     }
   }
+  drawChart();
 
   if(Product.totalClicks > 24) {
     Product.section.removeEventListener('click', handleClick);
+    console.log('NAMES', chartNames);
+    console.log('votes', chartVotes);
     showResults();
   }
-
   randomProduct();
 }
 
@@ -95,10 +98,44 @@ function showResults() {
     liEl.textContent = Product.allItems[i].name + ' has ' + Product.allItems[i].votes + ' votes in ' + Product.allItems[i].timesDisplayed + ' times shown.';
     Product.resultsList.appendChild(liEl);
   }
+  for (var j = 0; j < Product.allItems.length; j++){
+    chartNames[j] = Product.allItems[j].name;
+    chartVotes[j] = Product.allItems[j].votes;
+  }
 }
-
+//
+//
+var data = {
+  labels: chartNames, // titles array we declared earlier
+  datasets: [
+    {
+      data: chartVotes, // votes array we declared earlier
+    }
+  ]
+};
+function drawChart(){
+  var ctx = document.getElementById('bus-chart').getContext('2d');
+  busChart = new Chart(ctx,{
+    type: 'bar',
+    data: data,
+    options: {
+      legend: {
+        display: false,
+        labels: {
+          fontColor: 'green',
+          fontSize: 10,
+        }
+      },
+      responsive: false,
+    },
+    scales: {
+      yAxes: [{
+        ticks:{
+          stepSize: 1
+        }
+      }]
+    }
+  });
+}
 Product.section.addEventListener('click', handleClick);
-
-
-
 randomProduct();
