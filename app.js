@@ -1,141 +1,236 @@
 'use strict';
+//Global variable
+var surveyImagesArray = [];
+var totalClicks = 0;
 
-Product.allItems = [];
-Product.lastDisplayed = [];
-Product.totalClicks = 0;
-Product.section = document.getElementById('product-section');
-Product.resultsList = document.getElementById('results');
-
-function Product(name, filepath){
+//Object constructor
+function SurveyImages(name, filePath) {
   this.name = name;
-  this.filepath = filepath;
-  this.timesDisplayed = 0;
-  this.votes = 0;
-  Product.allItems.push(this);
-};
-var chartNames = [];
-var chartVotes = [];
-
-new Product('bag', 'img/bag.jpg');
-new Product('banana', 'img/banana.jpg');
-new Product('bathroom', 'img/bathroom.jpg');
-new Product('boots', 'img/boots.jpg');
-new Product('breakfast', 'img/breakfast.jpg');
-new Product('bubblegum', 'img/bubblegum.jpg');
-new Product('chair', 'img/chair.jpg');
-new Product('cthulhu', 'img/cthulhu.jpg');
-new Product('dog-duck', 'img/dog-duck.jpg');
-new Product('dragon', 'img/dragon.jpg');
-new Product('pen', 'img/pen.jpg');
-new Product('pet-sweep', 'img/pet-sweep.jpg');
-new Product('scissors', 'img/scissors.jpg');
-new Product('shark', 'img/shark.jpg');
-new Product('sweep', 'img/sweep.png');
-new Product('tauntaun', 'img/tauntaun.jpg');
-new Product('unicorn', 'img/unicorn.jpg');
-new Product('usb', 'img/usb.gif');
-new Product('water-can', 'img/water-can.jpg');
-new Product('wine-glass', 'img/wine-glass.jpg');
-//
-// function updateChart(){
-// }
-
-var imgEl1 = document.getElementById('item1');
-var imgEl2 = document.getElementById('item2');
-var imgEl3 = document.getElementById('item3');
-function randomProduct(){
-  var randomIndex1 = Math.floor(Math.random() * Product.allItems.length);
-  var randomIndex2 = Math.floor(Math.random() * Product.allItems.length);
-  var randomIndex3 = Math.floor(Math.random() * Product.allItems.length);
-  while(Product.lastDisplayed.includes(randomIndex1) || Product.lastDisplayed.includes(randomIndex2) || Product.lastDisplayed.includes(randomIndex3) || randomIndex1 === randomIndex2 || randomIndex1 === randomIndex3 || randomIndex2 === randomIndex3){
-    randomIndex1 = Math.floor(Math.random() * Product.allItems.length);
-    randomIndex2 = Math.floor(Math.random() * Product.allItems.length);
-    randomIndex3 = Math.floor(Math.random() * Product.allItems.length);
-  }
-
-  imgEl1.src = Product.allItems[randomIndex1].filepath;
-  imgEl1.id = Product.allItems[randomIndex1].name;
-  imgEl2.src = Product.allItems[randomIndex2].filepath;
-  imgEl2.id = Product.allItems[randomIndex2].name;
-  imgEl3.src = Product.allItems[randomIndex3].filepath;
-  imgEl3.id = Product.allItems[randomIndex3].name;
-  Product.allItems[randomIndex1].timesDisplayed += 1;
-  Product.allItems[randomIndex2].timesDisplayed += 1;
-  Product.allItems[randomIndex3].timesDisplayed += 1;
-  Product.lastDisplayed[0] = randomIndex1;
-  Product.lastDisplayed[1] = randomIndex2;
-  Product.lastDisplayed[2] = randomIndex3;
-};
-
-function handleClick(e) {
-  if(e.target.id === 'product-section') {
-    return alert('Please click on a product to choose it!');
-  }
-
-  Product.totalClicks += 1;
-
-  for(var i = 0; i < Product.allItems.length; i++) {
-    if(e.target.id === Product.allItems[i].name) {
-      Product.allItems[i].votes += 1;
-      updateChart();
-      // console.log(Product.allItems[i].votes, 'votes');
-    }
-  }
-  drawChart();
-
-  if(Product.totalClicks > 24) {
-    Product.section.removeEventListener('click', handleClick);
-    console.log('NAMES', chartNames);
-    console.log('votes', chartVotes);
-    showResults();
-  }
-  randomProduct();
+  this.filePath = filePath;
+  this.timesRendered = 0;
+  this.timesClicked = 0;
+  surveyImagesArray.push(this);
 }
 
-function showResults() {
-  for(var i = 0; i < Product.allItems.length; i++) {
-    var liEl = document.createElement('li');
-    liEl.textContent = Product.allItems[i].name + ' has ' + Product.allItems[i].votes + ' votes in ' + Product.allItems[i].timesDisplayed + ' times shown.';
-    Product.resultsList.appendChild(liEl);
+//function generates an array of random numbers within min and max values
+function randomNoArray (min, max) {
+  var getThreeIndex = [];
+  for (var i = 0; i < 3; i++) {
+    getThreeIndex.push(Math.floor(Math.random() * (max - min)) + min);
   }
-  for (var j = 0; j < Product.allItems.length; j++){
-    chartNames[j] = Product.allItems[j].name;
-    chartVotes[j] = Product.allItems[j].votes;
+  while (getThreeIndex[0] === getThreeIndex[1] || getThreeIndex[1] === getThreeIndex[2] || getThreeIndex[0] === getThreeIndex[2]) {
+    getThreeIndex.splice(1, 2);
+    getThreeIndex.push(Math.floor(Math.random() * (max - min)) + min);
+    getThreeIndex.push(Math.floor(Math.random() * (max - min)) + min);
+  }
+  return getThreeIndex;
+}
+
+//function to clear elements from page
+function clearBox(elementID) {
+  document.getElementById(elementID).innerHTML = '';
+}
+
+//function to count number of clicks
+function addClicks(id) {
+  for (var i = 0; i < surveyImagesArray.length; i++) {
+    if (surveyImagesArray[i].name == id) {
+      surveyImagesArray[i].timesClicked ++;
+      totalClicks ++;
+      console.log('total clicks: ' + totalClicks);
+      break;
+    }
   }
 }
-//
-//
-var data = {
-  labels: chartNames, // titles array we declared earlier
-  datasets: [
-    {
-      data: chartVotes, // votes array we declared earlier
-    }
-  ]
+
+//function to render three different random images to a page
+function renderImages() {
+  var getThreeIndex = randomNoArray(0, surveyImagesArray.length);
+  var randomObject, elBody, elImg;
+  elBody = document.getElementById('market-research');
+  for (var i = 0; i < 3; i++) {
+    randomObject = surveyImagesArray[getThreeIndex[i]];
+    elImg = document.createElement('img');
+    elImg.setAttribute('class', 'survey-display animated pulse');
+    elImg.setAttribute('src', randomObject.filePath);
+    elImg.setAttribute('id', randomObject.name);
+    elBody.appendChild(elImg);
+    randomObject.timesRendered ++;
+  }
+  eventListenerClickImage();
+}
+
+//create an instance of Survey Images for each product
+new SurveyImages('bag', 'img/bag.jpg');
+new SurveyImages('banana', 'img/banana.jpg');
+new SurveyImages('bathroom', 'img/bathroom.jpg');
+new SurveyImages('boots', 'img/boots.jpg');
+new SurveyImages('breakfast', 'img/breakfast.jpg');
+new SurveyImages('bubblegum', 'img/bubblegum.jpg');
+new SurveyImages('chair', 'img/chair.jpg');
+new SurveyImages('cthulhu', 'img/cthulhu.jpg');
+new SurveyImages('dog-duck', 'img/dog-duck.jpg');
+new SurveyImages('dragon', 'img/dragon.jpg');
+new SurveyImages('pen', 'img/pen.jpg');
+new SurveyImages('pet-sweep', 'img/pet-sweep.jpg');
+new SurveyImages('scissors', 'img/scissors.jpg');
+new SurveyImages('shark', 'img/shark.jpg');
+new SurveyImages('sweep', 'img/sweep.png');
+new SurveyImages('tauntaun', 'img/tauntaun.jpg');
+new SurveyImages('unicorn', 'img/unicorn.jpg');
+new SurveyImages('usb', 'img/usb.gif');
+new SurveyImages('water-can', 'img/water-can.jpg');
+new SurveyImages('wine-glass', 'img/wine-glass.jpg');
+
+//event Handler for clicking an image
+function handleImageClick(event) {
+  var imgEl = event.target;
+  var idEl = imgEl.id;
+  addClicks(idEl);
+  saveResultsToStorage();
+  clearBox('market-research');
+  if (totalClicks < 5) {
+    renderImages();
+  } else {
+    createButton('more-tries', '10 more');
+    eventListenerButtonTenMore();
+    createButton('results', 'Click for results!');
+    eventListenerResultsButton();
+  }
+}
+
+function eventListenerClickImage() {
+  var surveyDisplay = document.getElementsByClassName('survey-display');
+  for (var i = 0; i < surveyDisplay.length; i++){
+    surveyDisplay[i].addEventListener('click', handleImageClick);
+  }
+}
+
+function eventListenerResultsButton() {
+  var button = document.getElementById('results');
+  button.addEventListener('click', generateGraphOfData);
+}
+
+function eventListenerButtonTenMore() {
+  var button = document.getElementById('more-tries');
+  button.addEventListener('click', addTenMoreClicks);
+}
+
+function addTenMoreClicks() {
+  totalClicks -= 10;
+  clearBox('market-research');
+  clearBox('chart-area');
+  renderImages();
+}
+
+function BarChartData () {
+  this.labels = [];
+  this.datasets = [];
+}
+
+function BarDataSet(labelName, color) {
+  this.label = labelName;
+  this.fillColor = color;
+  this.strokeColor = color;
+  this.highlightFill = color;
+  this.highlightStroke = color;
+  this.data = [];
+}
+
+BarDataSet.prototype.setFields = function (inputArray, field) {
+  for (var i = 0; i < inputArray.length ; i++) {
+    this.data.push(inputArray[i][field]);
+  }
 };
-function drawChart(){
-  var ctx = document.getElementById('bus-chart').getContext('2d');
-  busChart = new Chart(ctx,{
-    type: 'bar',
-    data: data,
-    options: {
-      legend: {
-        display: false,
-        labels: {
-          fontColor: 'green',
-          fontSize: 10,
-        }
-      },
-      responsive: false,
-    },
-    scales: {
-      yAxes: [{
-        ticks:{
-          stepSize: 1
-        }
-      }]
+
+BarDataSet.prototype.setPercentClicked = function (inputArray, field1, field2) {
+  var percentClicked;
+  for (var i = 0; i < inputArray.length ; i++) {
+    percentClicked = parseInt(inputArray[i][field1]) / parseInt(inputArray[i][field2]);
+    if (isNaN(percentClicked)) {
+      this.data.push(0);
+    } else {
+      this.data.push(percentClicked);
     }
-  });
+  }
+};
+
+BarChartData.prototype.setLabels = function (inputArray, field) {
+  for (var i = 0; i < inputArray.length ; i++) {
+    this.labels.push(inputArray[i][field]);
+  }
+};
+
+BarChartData.prototype.pushData = function(chartData) {
+  this.datasets.push(chartData);
+};
+
+function generateGraphOfData(){
+  clearBox('market-research');
+  clearBox('chart-area');
+  createButton('more-tries', '10 more');
+  eventListenerButtonTenMore();
+  var elChartArea = document.getElementById('chart-area');
+  var chartHeading = document.createElement('h2');
+  chartHeading.textContent = 'Survey Results';
+  elChartArea.appendChild(chartHeading);
+  var elCanvas = document.createElement('canvas');
+  elCanvas.setAttribute('height', '450');
+  elCanvas.setAttribute('width', '700');
+  elCanvas.setAttribute('id', 'my-chart');
+  elChartArea.appendChild(elCanvas);
+
+  var clicksforgraph = new BarDataSet('clicks', 'rgba(207,70,71,1)');
+  clicksforgraph.setFields(surveyImagesArray, 'timesClicked');
+  console.log('clicksforgraph: ', clicksforgraph);
+
+  var renderedforgraph = new BarDataSet('times displayed', 'rgba(0, 135, 204, 1)');
+  renderedforgraph.setFields(surveyImagesArray, 'timesRendered');
+  console.log('renederedforgraph: ', renderedforgraph);
+
+  var percentClicks = new BarDataSet('ratio clicked to displayed', 'rgb(0,0,0)');
+  percentClicks.setPercentClicked(surveyImagesArray, 'timesClicked', 'timesRendered');
+  console.log('percentClicks: ', percentClicks);
+
+  var setUpBarChart = new BarChartData();
+  setUpBarChart.pushData(clicksforgraph);
+  setUpBarChart.pushData(renderedforgraph);
+  setUpBarChart.pushData(percentClicks);
+  setUpBarChart.setLabels(surveyImagesArray, 'name');
+  console.log('setUpBarChart, ', setUpBarChart);
+  var ctx = document.getElementById('my-chart').getContext('2d');
+  var myNewChart = new Chart(ctx).Bar(setUpBarChart);
 }
-Product.section.addEventListener('click', handleClick);
-randomProduct();
+
+function createButton (idName, buttonScript) {
+  var button = document.createElement('button');
+  button.setAttribute('id', idName);
+  button.innerHTML = buttonScript;
+  document.getElementById('market-research').appendChild(button);
+}
+
+function saveResultsToStorage(){
+  localStorage.setItem('surveyImagesData', JSON.stringify(surveyImagesArray));
+}
+
+function fetchResultsFromStorage(){
+  var surveyImagesData = JSON.parse(localStorage.getItem('surveyImagesData'));
+  if (surveyImagesData){
+    console.log('user has already saved their own prefs');
+    surveyImagesArray = surveyImagesData;
+  }
+}
+
+function clearLocalStorage(){
+  localStorage.clear();
+  surveyImagesArray = [];
+}
+
+var clearLsButton = document.getElementById('clear-ls');
+clearLsButton.addEventListener('click', clearLocalStorage);
+
+// function createButtonMoreClicks
+
+//call render Images function
+renderImages();
+fetchResultsFromStorage();
